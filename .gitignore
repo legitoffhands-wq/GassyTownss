@@ -1,0 +1,32 @@
+# Ignore everything by default
+*
+
+# But allow only our Gassytown project files
+!app.py
+!requirements.txt
+!.gitignore
+
+# Ignore all the personal / system junk
+AppData/
+NTUSER.DAT*
+ntuser.*
+OneDrive/
+Pictures/
+Videos/
+Music/
+Downloads/
+Documents/
+Favorites/
+Links/
+Searches/
+Saved Games/
+Contacts/
+Desktop.ini
+curseforge/
+recon-ng/
+spiderfoot/
+theHarvester/
+osint_*
+ultimate_osint*
+*.json
+*.html
