@@ -18,53 +18,42 @@ messages = []
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gassytown</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
 
 <style>
-body{
-margin:0;
-background:linear-gradient(135deg,#0d5c0d,#2e8b57,#4caf50,#81c784);
-background-size:400% 400%;
-animation:bg 20s ease infinite;
-font-family:sans-serif;
+body {
+    margin:0;
+    font-family:sans-serif;
+    background:#1e7d32;
+    color:white;
 }
-
-@keyframes bg{
-0%{background-position:0% 50%}
-50%{background-position:100% 50%}
-100%{background-position:0% 50%}
+.container {
+    max-width:900px;
+    margin:50px auto;
+    background:white;
+    color:black;
+    padding:40px;
+    border-radius:20px;
 }
-
-.container{
-background:white;
-border-radius:30px;
-padding:50px;
-margin:60px auto;
-max-width:1100px;
+.chat {
+    height:300px;
+    overflow:auto;
+    background:#f3fff3;
+    padding:15px;
+    border-radius:10px;
 }
-
-.chat{
-height:400px;
-overflow:auto;
-background:#f5fff5;
-padding:20px;
-border-radius:20px;
-}
-
-.msg{
-background:white;
-border:2px solid #81c784;
-padding:12px;
-margin:10px 0;
-border-radius:14px;
+.msg {
+    background:white;
+    border:2px solid #4caf50;
+    padding:10px;
+    margin:8px 0;
+    border-radius:10px;
 }
 </style>
 </head>
@@ -72,8 +61,54 @@ border-radius:14px;
 <body>
 
 <div class="container">
-<h1 class="text-center">Gassytown</h1>
+<h1>Gassytown</h1>
 
-<div class="chat" id="chat"></div>
+<div id="chat" class="chat"></div>
 
-<fo
+<form id="form">
+<input id="input" class="form-control mt-3">
+<button class="btn btn-success mt-2">Blast</button>
+</form>
+
+</div>
+
+<script>
+const socket = io({ transports: ["websocket"] });
+
+socket.on("message", msg => {
+    const box = document.getElementById("chat");
+    const div = document.createElement("div");
+    div.className = "msg";
+    div.textContent = msg;
+    box.appendChild(div);
+});
+
+document.getElementById("form").onsubmit = e => {
+    e.preventDefault();
+    const input = document.getElementById("input");
+    if(input.value.trim()){
+        socket.emit("message", input.value.trim());
+        input.value="";
+    }
+};
+</script>
+
+</body>
+</html>
+"""
+
+@app.route("/")
+def home():
+    return render_template_string(HTML_TEMPLATE)
+
+@socketio.on("message")
+def handle_message(msg):
+    messages.append(msg)
+    emit("message", msg, broadcast=True)
+
+if __name__ == "__main__":
+    socketio.run(
+        app,
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 10000))
+    )
